@@ -3,9 +3,11 @@ package com.informaweb.mariobroslike.Sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -25,9 +27,9 @@ public class Mario extends Sprite{
     private float stateTimer; // On déclare une variable stateTimer de type float pour pouvoir utiliser le temps écoulé depuis le dernier changement d'état du personnage
     private boolean runningRight; // On déclare une variable runningRight de type boolean pour pouvoir utiliser la direction du personnage
 
-    public Mario(World world, PlayScreen screen) {
+    public Mario(PlayScreen screen) {
         super(screen.getAtlas().findRegion("little_mario")); // On charge l'image du personnage
-        this.world = world; // On récupère le monde
+        this.world = screen.getWorld(); // On récupère le monde
         currentState = State.STANDING; // On initialise l'état actuel du personnage à STANDING
         previousState = State.STANDING; // On initialise l'état précédent du personnage à STANDING
         stateTimer = 0; // On initialise le temps écoulé depuis le dernier changement d'état du personnage à 0
@@ -107,9 +109,19 @@ public class Mario extends Sprite{
         FixtureDef fdef = new FixtureDef(); // On crée un FixtureDef pour pouvoir créer l'objet dans le monde
         CircleShape shape = new CircleShape(); // On crée un CircleShape pour pouvoir créer l'objet dans le monde
         shape.setRadius(6/MarioBrosLike.PPM); // On indique la taille de l'objet
+        fdef.filter.categoryBits = MarioBrosLike.MARIO_BIT; // On indique la catégorie de l'objet
+        fdef.filter.maskBits = MarioBrosLike.GROUND_BIT | MarioBrosLike.COIN_BIT | MarioBrosLike.BRICK_BIT | MarioBrosLike.ENEMY_BIT | MarioBrosLike.OBJECT_BIT | MarioBrosLike.ENEMY_HEAD_BIT; // On indique les catégories avec lesquelles l'objet peut entrer en collision
+
 
         fdef.shape = shape; // On indique la forme de l'objet
         b2body.createFixture(fdef); // On crée l'objet dans le monde
+
+        EdgeShape head = new EdgeShape(); // On crée une nouvelle forme pour de bord pour la tete de Mario
+        head.set(new Vector2(-2 / MarioBrosLike.PPM, 6 / MarioBrosLike.PPM), new Vector2(2 / MarioBrosLike.PPM, 6 / MarioBrosLike.PPM)); // On indique la taille de la forme
+        fdef.shape = head; // On indique la forme de l'objet
+
+        fdef.isSensor = true; // On indique que l'objet est un capteur
+        b2body.createFixture(fdef).setUserData("head"); // On crée l'objet dans le monde
     }
 
 }

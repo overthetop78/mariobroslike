@@ -18,10 +18,10 @@ public class Hud implements Disposable{ // Hud est une classe qui permet d'affic
     
     private Integer worldTimer; // On déclare une variable worldTimer de type Integer pour pouvoir afficher le timer
     private float timeCount; // On déclare une variable timeCount de type float pour pouvoir afficher le timer
-    private Integer score; // On déclare une variable score de type Integer pour pouvoir afficher le score
+    private static Integer score; // On déclare une variable score de type Integer pour pouvoir afficher le score
 
     Label countdownLabel; // On déclare une variable countdownLabel de type Label pour pouvoir afficher le timer
-    Label scoreLabel;  // On déclare une variable scoreLabel de type Label pour pouvoir afficher le score
+    static Label scoreLabel;  // On déclare une variable scoreLabel de type Label pour pouvoir afficher le score
     Label timeLabel; // On déclare une variable timeLabel de type Label pour pouvoir afficher le temps
     Label levelLabel; // On déclare une variable levelLabel de type Label pour pouvoir afficher le niveau
     Label worldLabel; // On déclare une variable worldLabel de type Label pour pouvoir afficher le monde
@@ -56,6 +56,20 @@ public class Hud implements Disposable{ // Hud est une classe qui permet d'affic
 
         stage.addActor(table); // On ajoute le tableau au stage pour pouvoir l'afficher 
 
+    }
+
+    public void update(float dt){
+        timeCount += dt; // On incrémente le compteur de temps
+        if(timeCount >= 1){ // Si le compteur de temps est supérieur ou égal à 1
+            worldTimer--; // On décrémente le timer
+            countdownLabel.setText(String.format("%03d", worldTimer)); // On met à jour le label countdownLabel
+            timeCount = 0; // On réinitialise le compteur de temps
+        }
+    }
+
+    public static void addScore(int value){
+        score += value; // On ajoute la valeur au score
+        scoreLabel.setText(String.format("%06d", score)); // On met à jour le label scoreLabel
     }
 
     @Override

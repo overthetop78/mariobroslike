@@ -3,6 +3,7 @@ package com.informaweb.mariobroslike.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -16,8 +17,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.informaweb.mariobroslike.MarioBrosLike;
 import com.informaweb.mariobroslike.Scenes.Hud;
+import com.informaweb.mariobroslike.Sprites.Goomba;
 import com.informaweb.mariobroslike.Sprites.Mario;
 import com.informaweb.mariobroslike.Tools.B2WorldCrceator;
+import com.informaweb.mariobroslike.Tools.WorldContactListener;
 
 public class PlayScreen implements Screen {
 
@@ -34,6 +37,11 @@ public class PlayScreen implements Screen {
     private Box2DDebugRenderer b2dr; // On déclare une variable b2dr de type Box2DDebugRenderer pour pouvoir afficher le monde
     
     private Mario player; // On déclare une variable player de type Mario pour pouvoir utiliser le personnage 
+    private Goomba goomba; // On déclare une variable goomba de type Goomba pour pouvoir utiliser l'ennemi Goomba
+
+    private Music music; // On déclare une variable music de type Music pour pouvoir utiliser la musique du stage 1
+
+
 
 
     public PlayScreen(MarioBrosLike game) {
@@ -53,10 +61,18 @@ public class PlayScreen implements Screen {
         world = new World(new Vector2(0, -10),true); // On initialise le monde
         b2dr = new Box2DDebugRenderer(); // On initialise le b2dr pour pouvoir afficher le monde
 
-        new B2WorldCrceator(world, map); // On crée les objets dans le monde à partir de la carte (map)
+        new B2WorldCrceator(this); // On crée les objets dans le monde à partir de la carte (map)
 
-        player = new Mario(world, this); // On initialise le personnage
+        player = new Mario(this); // On initialise le personnage
 
+        world.setContactListener(new WorldContactListener());
+
+        music = MarioBrosLike.manager.get("audio/music/mario_music.ogg", Music.class); // On récupère la musique du stage 1
+        music.setLooping(true); // On indique que la musique doit être jouée en boucle
+        music.play(); // On joue la musique
+
+        goomba = new Goomba(this, 0.32f, 0.32f); // On initialise l'ennemi Goomba
+        
     }
 
     public TextureAtlas getAtlas() {
@@ -84,6 +100,8 @@ public class PlayScreen implements Screen {
         world.step(1/60f, 6, 2); // On met à jour le monde 
 
         player.update(dt); // On met à jour le personnage
+        goomba.update(dt); // On met à jour l'ennemi Goomba
+        hud.update(dt); // On met à jour le Hud
         
         gameCam.position.x = player.b2body.getPosition().x; // On centre la caméra sur le personnage
 
@@ -105,6 +123,7 @@ public class PlayScreen implements Screen {
         game.batch.setProjectionMatrix(gameCam.combined); // On indique au SpriteBatch (game.batch) d'utiliser la caméra (gameCam) pour dessiner les images
         game.batch.begin(); // On commence à dessiner
         player.draw(game.batch); // On dessine le personnage
+        goomba.draw(game.batch); // On dessine l'ennemi Goomba
         game.batch.end(); // On arrête de dessiner
 
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined); // On indique au SpriteBatch (game.batch) d'utiliser la caméra du Hud (hud.stage.getCamera()) pour dessiner les images
@@ -115,6 +134,14 @@ public class PlayScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         gamePort.update(width, height); // On met à jour la vue de la caméra (gamePort) en fonction de la taille de l'écran
+    }
+
+    public TiledMap getMap() {
+        return map; // On retourne la carte
+    }
+
+    public World getWorld() {
+        return world; // On retourne le monde
     }
 
     @Override
